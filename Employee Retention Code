@@ -1,0 +1,349 @@
+---
+title: "R Day Project - Final"
+output: html_notebook
+---
+
+```{r}
+path <- "Users/haley/Desktop/STAT 8030 - R/R Project"
+hr <- read.csv("HR.csv", header = TRUE)
+```
+
+```{r}
+hr[, 3:8] <- sapply(hr[, 3:8], as.numeric)
+str(hr)
+```
+
+```{r}
+#Distribution Graph of Time Since Last Evaluation
+hr$last_evaluation1 <- cut(hr$last_evaluation, seq(0, 1.25, .25), right=FALSE, labels=c(1:5))
+counts <- table(hr$left, hr$last_evaluation1)
+barplot(counts, main="Employee Distribution by Time Since Last Evaluation and Left",
+  xlab="Time Since Last Evaluation Where 1 = 3 Months", col=c("green","red"),
+ 	legend = rownames(counts), beside=TRUE)
+```
+
+```{r}
+#Distribution Graph of Salary Level
+counts <- table(hr$left, hr$salary)
+barplot(counts, main="Employee Distribution by Salary Level and Left",
+  xlab="Salary", col=c("green","red"),
+ 	legend = rownames(counts), beside=TRUE)
+```
+
+```{r}
+#Distribution Graph of Number of Projects
+counts <- table(hr$left, hr$number_project)
+barplot(counts, main="Employee Distribution by Number of Projects and Left",
+  xlab="Number of Projects", col=c("green","red"),
+ 	legend = rownames(counts), beside=TRUE)
+```
+
+```{r}
+#Distribution Graph of Employee Satisfaction
+hr$satisfaction1 <- cut(hr$satisfaction_level, seq(0, 1.1, .1), right=FALSE, labels=c(1:11))
+counts <- table(hr$left, hr$satisfaction1)
+barplot(counts, main="Employee Distribution by Employee Satisfaction and Left",
+  xlab="Employee Satisfaction Level", col=c("green","red"),
+ 	legend = rownames(counts), beside=TRUE)
+```
+
+```{r}
+#Distribution Plot of Work Accidents
+counts <- table(hr$left, hr$Work_accident)
+barplot(counts, main="Employee Distribution by Work Accidents and Left",
+  xlab="Work Accident", col=c("green","red"),
+ 	legend = rownames(counts), beside=TRUE)
+```
+
+```{r}
+#Distribution Plot of Promotions
+counts <- table(hr$left, hr$promotion_last_5years)
+barplot(counts, main="Employee Distribution by Promotion and Left",
+  xlab="Promotion in Last 5 Years", col=c("green","red"),
+ 	legend = rownames(counts), beside=TRUE)
+```
+
+```{r}
+#Distribution Plot of Department
+counts <- table(hr$left, hr$sales)
+barplot(counts, main="Employee Distribution by Department and Left",
+  xlab="Employee Department", col=c("green","red"),
+ 	legend = rownames(counts), beside=TRUE)
+```
+
+```{r}
+#Distribution Plot of Average Monthly Hours
+hr$avmonthhours1 <- cut(hr$average_montly_hours, seq(0, 400, 160), right=FALSE, labels=c(1:2))
+counts <- table(hr$left, hr$avmonthhours1)
+barplot(counts, main="Employee Distribution by Average Monthly Hours Worked and Left",
+  xlab="Average Montly Hours Where 1 = 160 Hours and 2 = Over 160 Hours", col=c("green","red"),
+ 	legend = rownames(counts), beside=TRUE)
+```
+
+```{r}
+#Distribution Plot of Time At Company
+counts <- table(hr$left, hr$time_spend_company)
+barplot(counts, main="Employee Distribution by Time Spent at Company and Left",
+  xlab="Years at Company", col=c("green","red"),
+ 	legend = rownames(counts), beside=TRUE)
+```
+
+##Collect variable distributions##
+```{r}
+hist(hr$satisfaction_level, col="red", xlab= "Satisfaction Level", main="Satisfaction Level")
+```
+
+```{r}
+hist(hr$last_evaluation, col="light blue", xlab= "Last Evaluation", main="Last Evaluation")
+```
+
+```{r}
+counts <- table(hr$number_project)
+barplot(counts, col="green", xlab= "Number of Projects", main="Number of Projects")
+```
+
+```{r}
+hist(hr$average_montly_hours, col="light blue", xlab= "Average Monthly Hours", main="Average Monthly Hours")
+```
+
+```{r}
+counts1 <- table(hr$time_spend_company)
+barplot(counts1, col="purple", xlab= "Time Spent at Company", main="Time Spent at Company")
+```
+
+```{r}
+counts3 <- table(hr$Work_accident)
+barplot(counts3, col="black", xlab= "Work Accidents", main="Work Accidents")
+```
+
+```{r}
+counts4 <- table(hr$left)
+barplot(counts4, col="orange", xlab= "Left or Not", main="Employees that Stayed vs Employees that Left")
+```
+
+```{r}
+counts5 <- table(hr$promotion_last_5years)
+barplot(counts5, col="yellow", xlab= "Promotion or Not", main="Employees that Received a Promotion in the Last 5 Years")
+```
+
+```{r}
+install.packages('plyr')
+```
+
+```{r}
+library(plyr)
+count(hr, "sales")
+```
+
+```{r}
+counts <- table(hr$sales)
+par(mai=c(2, 0.82, 0.82, 0.42))
+barplot(counts, main="Department Distribution", las=2, col="dark blue", 
+names.arg=c("Accounting", "HR", "IT", "Management", "Marketing", "Product_MNG", "RandD", "Sales", "Support", "Technical"))
+
+```
+
+```{r}
+library(plyr)
+count(hr, "salary")
+```
+
+```{r}
+counts <- table(hr$salary)
+par(mai=c(2, 0.82, 0.82, 0.42))
+barplot(counts, main="Salary Level", col="light green",   
+names.arg=c("Low", "Medium", "High"))
+```
+
+```{r}
+#Splitting Training and Test Data so that Training is equal in 0's and 1's
+table(hr$left)
+input_ones <- hr[which(hr$left == 1),]
+input_zeros <- hr[which(hr$left == 0),]
+set.seed(100)
+input_ones_training_rows <- sample(1:nrow(input_ones), 0.7*nrow(input_ones))
+input_zeros_training_rows <- sample(1:nrow(input_zeros), 0.7*nrow(input_ones))
+training_ones <- input_ones[input_ones_training_rows,]
+training_zeros <- input_zeros[input_zeros_training_rows,]
+trainingdata <- rbind(training_ones, training_zeros)
+
+test_ones <- input_ones[-input_ones_training_rows,]
+test_zeros <- input_zeros[-input_zeros_training_rows,]
+testdata <- rbind(test_ones, test_zeros)
+
+table(trainingdata$left)
+table(testdata$left)
+```
+
+```{r}
+str(hr)
+```
+
+```{r}
+#Fixing Factor and Continuous Variables
+install.packages("smbinning")
+library(smbinning)
+
+factorvars <- c("sales", "salary", "last_evaluation1", "satisfaction1", "avmonthhours1", "work_accident", "promotion_last_5years")
+continuousvars <- c("satisfaction_level", "last_evaluation", "number_project", "average_montly_hours", "time_spend_company")
+```
+
+```{r}
+iv_df <- data.frame(vars = c(factorvars, continuousvars), IV = numeric(12))
+
+for(factor_var in factorvars) {
+  smb <- smbinning.factor(trainingdata, y = "left" , x = factor_var)
+  if(class(smb) != "character"){
+    iv_df[iv_df$vars == factor_var, "IV"] <- smb$iv
+  }
+}
+
+for(continuous_var in continuousvars) {
+  smb <- smbinning(trainingdata, y = "left", x = continuous_var)
+  if(class(smb) != "character") {
+    iv_df[iv_df$vars == continuous_var, "IV"] <- smb$iv
+  }
+}
+
+iv_df <- iv_df[order(-iv_df$IV), ]
+iv_df
+```
+
+```{r}
+#First Logistic Model
+logmod <- glm(left ~ satisfaction_level + average_montly_hours + time_spend_company + salary + sales + promotion_last_5years + last_evaluation + number_project, data = trainingdata, family = binomial(link = "logit"))
+
+predicted <- plogis(predict(logmod, testdata))
+summary(logmod)
+summary(predicted)
+```
+
+```{r}
+#Second Logistic Model
+logmod2 <- glm(left ~ satisfaction_level + average_montly_hours + time_spend_company + salary + promotion_last_5years + last_evaluation + number_project, data = trainingdata, family = binomial(link = "logit"))
+
+predicted2 <- plogis(predict(logmod2, testdata))
+summary(logmod2)
+summary(predicted2)
+```
+
+```{r}
+#Third Logistic Model
+logmod3 <- glm(left ~ satisfaction_level + average_montly_hours + time_spend_company + salary + last_evaluation + number_project, data = trainingdata, family = binomial(link = "logit"))
+
+predicted3 <- plogis(predict(logmod3, testdata))
+summary(logmod3)
+summary(predicted3)
+```
+
+```{r}
+#Fourth Logistic Model
+logmod4 <- glm(left ~ satisfaction_level + average_montly_hours + time_spend_company + last_evaluation + number_project, data = trainingdata, family = binomial(link = "logit"))
+
+predicted4 <- plogis(predict(logmod4, testdata))
+summary(logmod4)
+summary(predicted4)
+```
+
+```{r}
+install.packages("car")
+library(car)
+```
+
+```{r}
+vif(logmod4)
+```
+
+```{r}
+#ROC Curve
+install.packages("pROC")
+library(pROC)
+roc2 <- roc(testdata$left, predicted4, percent=TRUE,
+            # arguments for auc
+            #partial.auc=c(100, 90), partial.auc.correct=TRUE,
+            #partial.auc.focus="sens",
+            # arguments for plot
+            plot=TRUE, auc.polygon=TRUE, max.auc.polygon=TRUE, auc.polygon.col="light blue", grid=TRUE,
+            print.auc=TRUE, show.thres=TRUE)
+```
+
+```{r}
+#Concordance for Test Data
+install.packages("CRAN")
+library(CRAN)
+Concordance(testdata$left, predicted4)
+```
+
+```{r}
+#Sensitivity and Specificity for Test Data
+library(InformationValue)
+optCutOff <- optimalCutoff(testdata$left, predicted4)[1] 
+
+sensitivity(testdata$left, predicted4, threshold = optCutOff)
+
+specificity(testdata$left, predicted4, threshold = optCutOff)
+
+sensitivity(testdata$left, predicted4, threshold = 0.8)
+
+specificity(testdata$left, predicted4, threshold = 0.8)
+```
+
+```{r}
+#Log Odds for Variables
+
+#satisfaction
+exp(-4.5044463)
+
+#Average Monthly Hours
+exp(0.0054054)
+
+#Time Spent at Company
+exp(0.4728996)
+
+#Last Evaluation
+exp(1.3777728)
+
+#Number of Projects
+exp(0.4504306)
+
+```
+
+```{r}
+#This person Left
+-4.5044463*.11 + 0.0054054*282 + 0.4728996*4 + 1.3777728*.83 - 0.4504306*6 + 0.3995749
+```
+
+```{r}
+#This person stayed
+-4.5044463*.96 + 0.0054054*198 + 0.4728996*7 + 1.3777728*.48 - 0.4504306*4 + 0.3995749
+```
+
+```{r}
+#Probability that this person would leave (we know they stayed)
+(exp(-0.6845186))/(1+exp(-0.6845186))
+```
+
+```{r}
+#Probability that this person would leave (we know they left)
+(exp(1.760975))/(1+exp(1.760975))
+```
+
+```{r}
+# Joe Schmoe Logit
+-4.5044463*.6 + 0.0054054*175 + 0.4728996*3 + 1.3777728*.5 - 0.4504306*5 + 0.3995749
+```
+
+```{r}
+#Joe Schmoe Probability of Leaving
+(exp(-1.501716))/(1+exp(-1.501716))
+```
+
+```{r}
+#Heather Schmeather Logit
+-4.5044463*.4 + 0.0054054*225 + 0.4728996*4 + 1.3777728*.75 - 0.4504306*3 + 0.3995749
+```
+
+```{r}
+#Heather Scheather Probability of Leaving
+(exp(1.387648))/(1+exp(1.387648))
+```
